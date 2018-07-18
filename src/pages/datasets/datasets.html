@@ -1,0 +1,13 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Datasets</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-list>
+    <ion-item *ngFor="let item of datasets">
+      KM: {{item[0]}}, BatteryLvl: {{item[1]}}, GPS: {{item[2]}}
+    </ion-item>
+  </ion-list>
+</ion-content>
