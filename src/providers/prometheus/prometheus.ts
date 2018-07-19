@@ -1,10 +1,8 @@
 import { Injectable, EventEmitter } from '@angular/core';
-
 import { default as Web3 } from 'web3';
-import PrometheusArtifact from '../../../build/contracts/PrometheusToken.json';
-import TokenArtifact from '../../../build/contracts/MintableToken.json';
+import { default as EthereumQRPlugin } from 'ethereum-qr-code';
+import { Http, Response } from '@angular/http';
 
-declare var window: any;
 /*
   Generated class for the PrometheusProvider provider.
 
@@ -16,10 +14,10 @@ export class PrometheusProvider {
 
   private web3: Web3;
   private prometheusContract: any;
-  private tokenContract: any;
   private account: any;
-  private allEventListener: any;
+  private allEventsListener: any;
 
+  PrometheusArtifact: any;
   balance = new EventEmitter<number>();
   datasets = new EventEmitter<any[]>();
 
@@ -29,24 +27,24 @@ export class PrometheusProvider {
   //private static WEB3_PROVIDER = 'https://rinkeby.infura.io/v3/67a04a0b2dda4523b3f54e1e921c1267'; // Rinkeby Infura RPC
   private static NETWORK_ID = 4;
   // https://rinkeby.etherscan.io/token/0xa6d3dd3d622367a7213d16ecdf8238ac22362ec4
-  private static TOKEN_CONTRACT_ADDRESS = '0xa6d3dd3d622367a7213d16ecdf8238ac22362ec4'
   private static PRIVATE_KEY = '0xd48550009e7fa0930429cfc24d8ad8f46eceea2e7cf5931671a07d566bd825f1';
 
-  constructor() {
+  constructor(private http: Http) {
     console.log('PrometheusProvider loaded');
+    this.http.get('assets/contracts/PrometheusToken.json').subscribe((data) => {
+      this.PrometheusArtifact = data.json();
+    })
   }
 
   instantiateWeb3AndContractAndAccount() {
+    console.log("test");
     this.web3 = new Web3(PrometheusProvider.WEB3_PROVIDER);
     console.log('Web3 instantiated and connected to ', PrometheusProvider.WEB3_PROVIDER);
 
     this.prometheusContract = new this.web3.eth.Contract(
-      PrometheusArtifact.abi, PrometheusArtifact.networks[PrometheusProvider.NETWORK_ID].address
+      this.PrometheusArtifact.abi, this.PrometheusArtifact.networks[PrometheusProvider.NETWORK_ID].address
     );
 
-    this.tokenContract = new this.web3.eth.Contract(
-      TokenArtifact.abi, PrometheusProvider.TOKEN_CONTRACT_ADDRESS
-    )
     console.log("Contracts initiated");
 
     this.account = this.web3.eth.accounts.privateKeyToAccount(PrometheusProvider.PRIVATE_KEY);
@@ -72,7 +70,7 @@ export class PrometheusProvider {
   }
 
   fetchBalance() {
-    return this.tokenContract.methods.balanceOf(this.account.address).call({ from: this.account.address })
+    return this.prometheusContract.methods.balanceOf(this.account.address).call({ from: this.account.address })
       .then((value) => this.balance.emit(value.valueOf()));
   }
 
@@ -81,7 +79,7 @@ export class PrometheusProvider {
   }
 
   watchBalance() {
-    this.allEventListener = this.tokenContract.events.Mint({ filter: { to: this.account.address } }, function (error, event) { console.log(event); })
+    this.allEventsListener = this.prometheusContract.events.Mint({ filter: { to: this.account.address } }, function (error, event) { console.log(event); })
       .on('data', () => {
         this.fetchBalance()
         this.fetchDatasets()
@@ -94,9 +92,9 @@ export class PrometheusProvider {
     // create Transaction
     const tx = {
       from: this.account.address,
-      to: this.tokenContract.options.address,
-      data: this.tokenContract.methods.transfer(address, amount).encodeABI(),
-      gas: await this.tokenContract.methods.transfer(address, amount).estimateGas(),
+      to: this.prometheusContract.options.address,
+      data: this.prometheusContract.methods.transfer(address, amount).encodeABI(),
+      gas: await this.prometheusContract.methods.transfer(address, amount).estimateGas(),
     };
 
     console.log("Transaction created: " + tx);
@@ -114,6 +112,10 @@ export class PrometheusProvider {
 
   getAccountAddress() {
     return this.account.address;
+  }
+
+  readQRCodeString(qrcode: string) {
+    return new EthereumQRPlugin().readStringToJSON(qrcode);
   }
 
 }
