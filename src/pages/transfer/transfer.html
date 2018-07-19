@@ -7,7 +7,7 @@
 </ion-header>
 
 <ion-content>
-  <button ion-button (click)="scanQR()" [disabled]="disableQRButton">Scan QR Code</button>
+  <button ion-button block round (click)="scanQR()" [disabled]="disableQRButton">Scan QR Code</button>
   <div *ngIf="receipt">
     <h1>Transfer successful</h1>
     <a href="https://rinkeby.etherscan.io/tx/{{receipt.transactionHash}}">Details here</a>

@@ -10,6 +10,10 @@
   <ion-refresher (ionRefresh)="doRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
-  Wallet Address: {{address}}
-  <br /> Promi Balance: {{balance}}
+  <ion-list>
+    <ion-item>
+      <h2>Address: {{address}}</h2>
+      <p>Balance: {{balance}} AudiCoins</p>
+    </ion-item>
+  </ion-list>
 </ion-content>

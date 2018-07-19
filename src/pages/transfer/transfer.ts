@@ -23,9 +23,6 @@ export class TransferPage {
 
   ngOnInit() {
     this.scanQR();
-    this.loadingView = this.loadingCtrl.create({
-      content: 'Bitte warten. Transaction wird gemined.',
-    });
   }
 
   scanQR() {
@@ -45,6 +42,7 @@ export class TransferPage {
   }
 
   private showTxConfirmAlert() {
+
     const alert = this.alertCtrl.create({
       title: "Confirm Transaction",
       subTitle: "Receiver: " + this.tx.to + ", Value: " + this.tx.value,
@@ -59,6 +57,9 @@ export class TransferPage {
         {
           text: 'Confirm',
           handler: data => {
+            this.loadingView = this.loadingCtrl.create({
+              content: 'Bitte warten. Transaction wird gemined.',
+            });
             this.loadingView.present();
             this.prometheus.transfer(this.tx.argsDefaults[0].value, parseInt(this.tx.argsDefaults[1].value))
               .then((receipt) => {
