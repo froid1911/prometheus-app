@@ -5,6 +5,9 @@
 </ion-header>
 
 <ion-content padding>
+  <ion-refresher (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
   <ion-list>
     <ion-item *ngFor="let item of datasets">
       KM: {{item[0]}}, BatteryLvl: {{item[1]}}, GPS: {{item[2]}}

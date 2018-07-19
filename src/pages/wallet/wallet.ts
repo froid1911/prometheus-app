@@ -15,10 +15,18 @@ export class WalletPage implements OnInit {
 
   }
 
-  ngOnInit(): void {
+  setup() {
     this.address = this.prometheus.getAccountAddress();
     this.prometheus.balance.subscribe((balance) => this.balance = balance);
     this.prometheus.fetchBalance();
+  }
+
+  doRefresh(refresher) {
+    this.prometheus.fetchBalance().then((() => refresher.complete()))
+  }
+
+  ngOnInit(): void {
+    this.setup();
   }
 
 }

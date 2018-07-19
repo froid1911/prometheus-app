@@ -12,7 +12,7 @@ import { PrometheusProvider } from '../providers/prometheus/prometheus';
 import { WalletPage } from '../pages/wallet/wallet';
 import { TransferPage } from '../pages/transfer/transfer';
 
-import { QRScanner } from '@ionic-native/qr-scanner';
+import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 import { HttpModule } from '@angular/http';
 @NgModule({
   declarations: [
@@ -40,7 +40,7 @@ import { HttpModule } from '@angular/http';
     SplashScreen,
     { provide: ErrorHandler, useClass: IonicErrorHandler },
     PrometheusProvider,
-    QRScanner
+    BarcodeScanner
   ]
 })
 export class AppModule { }

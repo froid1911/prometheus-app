@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, Refresher } from 'ionic-angular';
 import { PrometheusProvider } from '../../providers/prometheus/prometheus';
 
 @Component({
@@ -15,11 +15,21 @@ export class DatasetsPage implements OnInit {
 
   }
 
-  ngOnInit(): void {
+  setup() {
     this.prometheus.datasets.subscribe((datasets) => {
       this.datasets = datasets;
       console.log(this.datasets);
     });
+  }
+
+  ngOnInit(): void {
+    this.setup();
+  }
+
+  doRefresh(refresher) {
+    this.prometheus.fetchDatasets().then(() => {
+      refresher.complete();
+    })
   }
 
 }

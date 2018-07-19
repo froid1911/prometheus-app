@@ -1,17 +1,15 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      Contact
+      Transfer
     </ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <ion-list-header>Follow us on Twitter</ion-list-header>
-    <ion-item>
-      <ion-icon name="ionic" item-start></ion-icon>
-      @frankpfeift
-    </ion-item>
-  </ion-list>
+  <button ion-button (click)="scanQR()" [disabled]="disableQRButton">Scan QR Code</button>
+  <div *ngIf="receipt">
+    <h1>Transfer successful</h1>
+    <a href="https://rinkeby.etherscan.io/tx/{{receipt.transactionHash}}">Details here</a>
+  </div>
 </ion-content>

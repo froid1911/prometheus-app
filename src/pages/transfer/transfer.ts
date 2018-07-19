@@ -1,66 +1,77 @@
 import { Component, OnInit } from '@angular/core';
-import { QRScanner } from '@ionic-native/qr-scanner';
 import { PrometheusProvider } from '../../providers/prometheus/prometheus';
-import { AlertController, NavController } from 'ionic-angular';
-import { DatasetsPage } from '../datasets/datasets';
+import { AlertController, LoadingController } from 'ionic-angular';
+import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 
 @Component({
   selector: 'page-transfer',
   templateUrl: 'transfer.html'
 })
-export class TransferPage implements OnInit {
+export class TransferPage {
 
   tx: any;
-
+  receipt: any;
+  disableQRButton = false;
+  loadingView: any;
   constructor(
-    public qrScanner: QRScanner,
+    public barcodeScanner: BarcodeScanner,
     private prometheus: PrometheusProvider,
     private alertCtrl: AlertController,
-    private navCtrl: NavController) {
+    private loadingCtrl: LoadingController) {
 
   }
 
   ngOnInit() {
     this.scanQR();
+    this.loadingView = this.loadingCtrl.create({
+      content: 'Bitte warten. Transaction wird gemined.',
+    });
   }
 
-  protected scanQR() {
-    this.qrScanner.prepare().then((instance) => {
-      console.log(instance);
-      if (!instance.authorized) {
-        return alert('Please authorize the App to access your Camera.')
-      }
+  scanQR() {
+    this.receipt = false;
+    this.barcodeScanner.scan({
+      preferFrontCamera: false,
+      showFlipCameraButton: true,
+      showTorchButton: true,
+    }).then((barcodeData) => {
 
-      this.qrScanner.scan().subscribe((qrcode) => {
-        // decode string
-        this.tx = this.prometheus.readQRCodeString(qrcode);
-        console.log(this.tx);
-        this.qrScanner.hide();
-        this.showTxConfirmAlert();
-      })
+      this.tx = this.prometheus.readQRCodeString(barcodeData.text);
+      console.log(this.tx);
+      this.disableQRButton = true;
+      this.showTxConfirmAlert();
+
     })
   }
 
   private showTxConfirmAlert() {
-    this.alertCtrl.create({
+    const alert = this.alertCtrl.create({
       title: "Confirm Transaction",
       subTitle: "Receiver: " + this.tx.to + ", Value: " + this.tx.value,
       buttons: [
         {
           text: 'Cancel',
           handler: data => {
+            this.disableQRButton = false;
             console.log('Cancel clicked');
           }
         },
         {
-          text: 'Save',
+          text: 'Confirm',
           handler: data => {
-            console.log(this.tx);
-            console.log('Saved clicked');
+            this.loadingView.present();
+            this.prometheus.transfer(this.tx.argsDefaults[0].value, parseInt(this.tx.argsDefaults[1].value))
+              .then((receipt) => {
+                this.disableQRButton = false;
+                this.receipt = receipt;
+                this.loadingView.dismiss();
+              }).catch(console.error);
           }
         }
       ]
-    })
+    });
+
+    alert.present();
   }
 
   protected showTxConfirmModal() {
